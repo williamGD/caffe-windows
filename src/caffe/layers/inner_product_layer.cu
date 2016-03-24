@@ -12,6 +12,15 @@ void InnerProductLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
   const Dtype* weight = this->blobs_[0]->gpu_data();
+
+  if (use_normlization_) {
+    Dtype sum_sq;
+    for (int i = 0; i < this->blobs_[0]->num(); i++) {
+      caffe_gpu_dot(K_, weight + i * K_, weight + i * K_, &sum_sq);
+      caffe_gpu_scale<Dtype>(K_, normalize_scale_ / sqrt(sum_sq), weight + i * K_, this->blobs_[0]->mutable_gpu_data() + i * K_);
+    }
+  }
+
   if (M_ == 1) {
     caffe_gpu_gemv<Dtype>(CblasNoTrans, N_, K_, (Dtype)1.,
                          weight, bottom_data, (Dtype)0., top_data);

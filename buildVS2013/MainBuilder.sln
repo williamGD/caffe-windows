@@ -32,6 +32,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "compute_image_mean", "compu
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "convert_mnist_data", "convert_mnist_data\convert_mnist_data.vcxproj", "{3A7FC59A-DA9C-4806-998B-66207DD91F7D}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "python", "python.pyproj", "{827F8C01-F34A-4EB2-8876-2285B186C72C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -142,6 +144,14 @@ Global
 		{3A7FC59A-DA9C-4806-998B-66207DD91F7D}.Release|Win32.Build.0 = Release|Win32
 		{3A7FC59A-DA9C-4806-998B-66207DD91F7D}.Release|x64.ActiveCfg = Release|x64
 		{3A7FC59A-DA9C-4806-998B-66207DD91F7D}.Release|x64.Build.0 = Release|x64
+		{827F8C01-F34A-4EB2-8876-2285B186C72C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{827F8C01-F34A-4EB2-8876-2285B186C72C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{827F8C01-F34A-4EB2-8876-2285B186C72C}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{827F8C01-F34A-4EB2-8876-2285B186C72C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{827F8C01-F34A-4EB2-8876-2285B186C72C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{827F8C01-F34A-4EB2-8876-2285B186C72C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{827F8C01-F34A-4EB2-8876-2285B186C72C}.Release|Win32.ActiveCfg = Release|Any CPU
+		{827F8C01-F34A-4EB2-8876-2285B186C72C}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

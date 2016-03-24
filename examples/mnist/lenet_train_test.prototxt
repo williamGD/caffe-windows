@@ -30,116 +30,221 @@ layer {
   include: { phase: TEST }
 }
 layer {
-  name: "conv1"
+  name: "Convolution1"
   type: "Convolution"
   bottom: "data"
-  top: "conv1"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
+  top: "Convolution1"
   convolution_param {
     num_output: 20
+    bias_term: false
+    pad: 0
     kernel_size: 5
     stride: 1
     weight_filler {
-      type: "xavier"
+      type: "msra"
     }
+    normalize_scale: 3.0
+  }
+}
+layer {
+  name: "Sigmoid1"
+  type: "Sigmoid"
+  bottom: "Convolution1"
+  top: "Convolution1"
+}
+layer {
+  name: "Scale1"
+  type: "Scale"
+  bottom: "Convolution1"
+  top: "Scale1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.3673
+    }
+    bias_term: true
     bias_filler {
       type: "constant"
+      value: 0.1837
     }
   }
 }
 layer {
-  name: "pool1"
+  name: "Pooling1"
   type: "Pooling"
-  bottom: "conv1"
-  top: "pool1"
+  bottom: "Scale1"
+  top: "Pooling1"
   pooling_param {
     pool: MAX
     kernel_size: 2
-    stride: 2
+    stride: 1
   }
 }
 layer {
-  name: "Insanity1"
-  type: "Insanity"
-  bottom: "pool1"
-  top: "pool1"
+  name: "Scale2"
+  type: "Scale"
+  bottom: "Pooling1"
+  top: "Scale2"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.701
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.7214
+    }
+  }
 }
 layer {
-  name: "conv2"
+  name: "Convolution2"
   type: "Convolution"
-  bottom: "pool1"
-  top: "conv2"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
+  bottom: "Scale2"
+  top: "Convolution2"
   convolution_param {
     num_output: 50
+    bias_term: false
+    pad: 0
     kernel_size: 5
     stride: 1
     weight_filler {
-      type: "xavier"
+      type: "msra"
     }
+    normalize_scale: 3.0
+  }
+}
+layer {
+  name: "Sigmoid2"
+  type: "Sigmoid"
+  bottom: "Convolution2"
+  top: "Convolution2"
+}
+layer {
+  name: "Scale3"
+  type: "Scale"
+  bottom: "Convolution2"
+  top: "Scale3"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.3673
+    }
+    bias_term: true
     bias_filler {
       type: "constant"
+      value: 0.1837
     }
   }
 }
 layer {
-  name: "pool2"
+  name: "Pooling2"
   type: "Pooling"
-  bottom: "conv2"
-  top: "pool2"
+  bottom: "Scale3"
+  top: "Pooling2"
   pooling_param {
     pool: MAX
     kernel_size: 2
-    stride: 2
+    stride: 1
   }
 }
 layer {
-  name: "relu2"
-  type: "Insanity"
-  bottom: "pool2"
-  top: "pool2"
+  name: "Scale4"
+  type: "Scale"
+  bottom: "Pooling2"
+  top: "Scale4"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.701
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.7214
+    }
+  }
 }
 layer {
-  name: "ip1"
+  name: "InnerProduct1"
   type: "InnerProduct"
-  bottom: "pool2"
-  top: "ip1"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
+  bottom: "Scale4"
+  top: "InnerProduct1"
   inner_product_param {
     num_output: 500
     weight_filler {
       type: "xavier"
     }
+    normalize_scale: 3.0
+  }
+}
+layer {
+  name: "Sigmoid3"
+  type: "Sigmoid"
+  bottom: "InnerProduct1"
+  top: "InnerProduct1"
+}
+layer {
+  name: "Scale5"
+  type: "Scale"
+  bottom: "InnerProduct1"
+  top: "Scale5"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.3673
+    }
+    bias_term: true
     bias_filler {
       type: "constant"
+      value: 0.1837
     }
   }
 }
 layer {
-  name: "relu3"
-  type: "Insanity"
-  bottom: "ip1"
-  top: "ip1"
-}
-layer {
   name: "ip2"
   type: "InnerProduct"
-  bottom: "ip1"
+  bottom: "Scale5"
   top: "ip2"
   param {
     lr_mult: 1
