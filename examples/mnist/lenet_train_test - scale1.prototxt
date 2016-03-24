@@ -1,0 +1,281 @@
+name: "LeNet"
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  data_param {
+    source: "examples/mnist/mnist-train-leveldb"
+    backend: LEVELDB
+    batch_size: 64
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  include: { phase: TRAIN }
+}
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  data_param {
+    source: "examples/mnist/mnist-test-leveldb"
+    backend: LEVELDB
+    batch_size: 100
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  include: { phase: TEST }
+}
+layer {
+  name: "Convolution1"
+  type: "Convolution"
+  bottom: "data"
+  top: "Convolution1"
+  convolution_param {
+    num_output: 20
+    bias_term: false
+    pad: 0
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    normalize_scale: 1.0
+  }
+}
+layer {
+  name: "Sigmoid1"
+  type: "Sigmoid"
+  bottom: "Convolution1"
+  top: "Convolution1"
+}
+layer {
+  name: "Scale1"
+  type: "Scale"
+  bottom: "Convolution1"
+  top: "Scale1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.2084
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.1042
+    }
+  }
+}
+layer {
+  name: "Pooling1"
+  type: "Pooling"
+  bottom: "Scale1"
+  top: "Pooling1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 1
+  }
+}
+layer {
+  name: "Scale2"
+  type: "Scale"
+  bottom: "Pooling1"
+  top: "Scale2"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.701
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.7214
+    }
+  }
+}
+layer {
+  name: "Convolution2"
+  type: "Convolution"
+  bottom: "Scale2"
+  top: "Convolution2"
+  convolution_param {
+    num_output: 50
+    bias_term: false
+    pad: 0
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    normalize_scale: 1.0
+  }
+}
+layer {
+  name: "Sigmoid2"
+  type: "Sigmoid"
+  bottom: "Convolution2"
+  top: "Convolution2"
+}
+layer {
+  name: "Scale3"
+  type: "Scale"
+  bottom: "Convolution2"
+  top: "Scale3"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.2084
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.1042
+    }
+  }
+}
+layer {
+  name: "Pooling2"
+  type: "Pooling"
+  bottom: "Scale3"
+  top: "Pooling2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 1
+  }
+}
+layer {
+  name: "Scale4"
+  type: "Scale"
+  bottom: "Pooling2"
+  top: "Scale4"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.701
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.7214
+    }
+  }
+}
+layer {
+  name: "InnerProduct1"
+  type: "InnerProduct"
+  bottom: "Scale4"
+  top: "InnerProduct1"
+  inner_product_param {
+    num_output: 500
+    weight_filler {
+      type: "xavier"
+    }
+    normalize_scale: 1.0
+  }
+}
+layer {
+  name: "Sigmoid3"
+  type: "Sigmoid"
+  bottom: "InnerProduct1"
+  top: "InnerProduct1"
+}
+layer {
+  name: "Scale5"
+  type: "Scale"
+  bottom: "InnerProduct1"
+  top: "Scale5"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.2084
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.1042
+    }
+  }
+}
+layer {
+  name: "ip2"
+  type: "InnerProduct"
+  bottom: "Scale5"
+  top: "ip2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 10
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "ip2"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "ip2"
+  bottom: "label"
+  top: "loss"
+}

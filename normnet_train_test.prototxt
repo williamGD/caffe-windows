@@ -1,0 +1,260 @@
+layer {
+  name: "MemoryData1"
+  type: "MemoryData"
+  top: "MemoryData1"
+  top: "MemoryData2"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mirror: true
+    mean_value: 104
+    mean_value: 117
+    mean_value: 123
+  }
+  memory_data_param {
+    batch_size: 256
+    channels: 3
+    height: 28
+    width: 28
+  }
+}
+layer {
+  name: "Convolution1"
+  type: "Convolution"
+  bottom: "MemoryData1"
+  top: "Convolution1"
+  convolution_param {
+    num_output: 20
+    bias_term: false
+    pad: 0
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    normalize_scale: 3.0
+  }
+}
+layer {
+  name: "Sigmoid1"
+  type: "Sigmoid"
+  bottom: "Convolution1"
+  top: "Convolution1"
+}
+layer {
+  name: "Scale1"
+  type: "Scale"
+  bottom: "Convolution1"
+  top: "Scale1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.3673
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.1837
+    }
+  }
+}
+layer {
+  name: "Pooling1"
+  type: "Pooling"
+  bottom: "Scale1"
+  top: "Pooling1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 1
+  }
+}
+layer {
+  name: "Scale2"
+  type: "Scale"
+  bottom: "Pooling1"
+  top: "Scale2"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.701
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.7214
+    }
+  }
+}
+layer {
+  name: "Convolution2"
+  type: "Convolution"
+  bottom: "Scale2"
+  top: "Convolution2"
+  convolution_param {
+    num_output: 50
+    bias_term: false
+    pad: 0
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    normalize_scale: 3.0
+  }
+}
+layer {
+  name: "Sigmoid2"
+  type: "Sigmoid"
+  bottom: "Convolution2"
+  top: "Convolution2"
+}
+layer {
+  name: "Scale3"
+  type: "Scale"
+  bottom: "Convolution2"
+  top: "Scale3"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.3673
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.1837
+    }
+  }
+}
+layer {
+  name: "Pooling2"
+  type: "Pooling"
+  bottom: "Scale3"
+  top: "Pooling2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 1
+  }
+}
+layer {
+  name: "Scale4"
+  type: "Scale"
+  bottom: "Pooling2"
+  top: "Scale4"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.701
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.7214
+    }
+  }
+}
+layer {
+  name: "InnerProduct1"
+  type: "InnerProduct"
+  bottom: "Scale4"
+  top: "InnerProduct1"
+  inner_product_param {
+    num_output: 500
+    weight_filler {
+      type: "xavier"
+    }
+    normalize_scale: 3.0
+  }
+}
+layer {
+  name: "Sigmoid3"
+  type: "Sigmoid"
+  bottom: "InnerProduct1"
+  top: "InnerProduct1"
+}
+layer {
+  name: "Scale5"
+  type: "Scale"
+  bottom: "InnerProduct1"
+  top: "Scale5"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  scale_param {
+    filler {
+      type: "constant"
+      value: 0.3673
+    }
+    bias_term: true
+    bias_filler {
+      type: "constant"
+      value: 0.1837
+    }
+  }
+}
+layer {
+  name: "InnerProduct2"
+  type: "InnerProduct"
+  bottom: "Scale5"
+  top: "InnerProduct2"
+  inner_product_param {
+    num_output: 10
+  }
+}
+layer {
+  name: "SoftmaxWithLoss1"
+  type: "SoftmaxWithLoss"
+  bottom: "InnerProduct2"
+  bottom: "MemoryData2"
+  top: "SoftmaxWithLoss1"
+}
+layer {
+  name: "Accuracy1"
+  type: "Accuracy"
+  bottom: "InnerProduct2"
+  bottom: "MemoryData2"
+  top: "Accuracy1"
+  include {
+    phase: TEST
+  }
+}
+

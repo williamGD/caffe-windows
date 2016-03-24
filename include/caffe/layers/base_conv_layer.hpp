@@ -92,6 +92,8 @@ class BaseConvolutionLayer : public Layer<Dtype> {
   bool bias_term_;
   bool is_1x1_;
   bool force_nd_im2col_;
+  Dtype normalize_scale_;
+  bool use_normlization_;
 
  private:
   // wrap im2col/col2im so we don't have to remember the (long) argument lists
