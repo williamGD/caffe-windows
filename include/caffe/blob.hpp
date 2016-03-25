@@ -24,7 +24,8 @@ template <typename Dtype>
 class Blob {
  public:
   Blob()
-       : data_(), diff_(), count_(0), capacity_(0) {}
+    : data_(), diff_(), count_(0), capacity_(0), use_normalization_(false) {
+  }
 
   /// @brief Deprecated; use <code>Blob(const vector<int>& shape)</code>.
   explicit Blob(const int num, const int channels, const int height,
@@ -216,6 +217,11 @@ class Blob {
     return diff_;
   }
 
+  inline void set_normalize_scale(Dtype normalize_scale) {
+    use_normalization_ = true;
+    normalize_scale_ = normalize_scale;
+  }
+
   const Dtype* cpu_data() const;
   void set_cpu_data(Dtype* data);
   const int* gpu_shape() const;
@@ -272,6 +278,8 @@ class Blob {
   vector<int> shape_;
   int count_;
   int capacity_;
+  bool use_normalization_;
+  Dtype normalize_scale_;
 
   DISABLE_COPY_AND_ASSIGN(Blob);
 };  // class Blob

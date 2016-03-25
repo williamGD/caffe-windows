@@ -5,23 +5,23 @@ import caffe
 
 # helper function for common structures
 
-sigmoid_scale = 0.3673#0.2084
-sigmoid_bias = 0.1837#0.1042
+sigmoid_scale = 0.2084#0.3673#0.2084
+sigmoid_bias = 0.1042#0.1837#0.1042
 
 def ip_factory(bottom, nout):
-    ip = L.InnerProduct(bottom, num_output=nout, normalize_scale=3.0, weight_filler=dict(type='xavier'))
+    ip = L.InnerProduct(bottom, num_output=nout, normalize_scale=1.0, weight_filler=dict(type='xavier'))
     sigmoid = L.Sigmoid(ip, in_place = True);
     scale = L.Scale(sigmoid, bias_term=True, 
-                    filler=dict(type='constant',value=sigmoid_scale),bias_filler=dict(type='constant', value=sigmoid_bias),
+                    filler=dict(type='constant',value= 1.0 / sigmoid_scale),bias_filler=dict(type='constant', value=-0.5 / sigmoid_scale),
                     param=[dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0)]);
     return scale
 
 def conv_factory(bottom, ks, nout, stride=1, pad=0):
-    conv = L.Convolution(bottom, kernel_size=ks, stride=stride, normalize_scale=3.0,
+    conv = L.Convolution(bottom, kernel_size=ks, stride=stride, normalize_scale=1.0,
                                 num_output=nout, pad=pad, bias_term=False, weight_filler=dict(type='msra'))
     sigmoid = L.Sigmoid(conv, in_place = True);
     scale = L.Scale(sigmoid, bias_term=True, 
-                    filler=dict(type='constant',value=sigmoid_scale),bias_filler=dict(type='constant', value=sigmoid_bias),
+                    filler=dict(type='constant',value=1.0 / sigmoid_scale),bias_filler=dict(type='constant', value=-0.5 / sigmoid_scale),
                     param=[dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0)]);
     return scale
 
@@ -52,12 +52,11 @@ def normnet(train_lmdb, test_lmdb, batch_size=256, stages=[2, 2, 2, 2], input_si
         include=dict(phase=getattr(caffe_pb2, 'TEST')))
 
     # the net itself
+    batch_norm = L.BatchNorm(data, in_place=True, param=[dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0)])
     
-    conv1 = conv_factory(data, 5, 20)
-    pool1 = max_pool_2x2(conv1)
-    conv2 = conv_factory(pool1, 5, 50)
-    pool2 = max_pool_2x2(conv2)
-    ip1 = ip_factory(pool2, 500)
+    ip1 = ip_factory(batch_norm, 500)
+    for i in range(30):
+        ip1 = ip_factory(ip1, 100)
 
     fc = L.InnerProduct(ip1, num_output=10)
     loss = L.SoftmaxWithLoss(fc, label)

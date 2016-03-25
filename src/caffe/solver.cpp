@@ -223,30 +223,44 @@ void Solver<Dtype>::Step(int iters) {
       loss += net_->ForwardBackward(bottom_vec);
     }
     loss /= param_.iter_size();
+    if (isnan(loss)) {
+      LOG_IF(INFO, Caffe::root_solver()) << "Iteration " << iter_
+        << ", loss = " << loss << ", ignore and continue.";
+      ++iter_;
+      continue;
+    }
     // average the loss across iterations for smoothed reporting
     UpdateSmoothedLoss(loss, start_iter, average_loss);
     if (display) {
       LOG_IF(INFO, Caffe::root_solver()) << "Iteration " << iter_
-          << ", loss = " << smoothed_loss_;
+        << ", loss = " << smoothed_loss_;
       const vector<Blob<Dtype>*>& result = net_->output_blobs();
       int score_index = 0;
       for (int j = 0; j < result.size(); ++j) {
         const Dtype* result_vec = result[j]->cpu_data();
         const string& output_name =
-            net_->blob_names()[net_->output_blob_indices()[j]];
+          net_->blob_names()[net_->output_blob_indices()[j]];
         const Dtype loss_weight =
-            net_->blob_loss_weights()[net_->output_blob_indices()[j]];
+          net_->blob_loss_weights()[net_->output_blob_indices()[j]];
         for (int k = 0; k < result[j]->count(); ++k) {
           ostringstream loss_msg_stream;
           if (loss_weight) {
             loss_msg_stream << " (* " << loss_weight
-                            << " = " << loss_weight * result_vec[k] << " loss)";
+              << " = " << loss_weight * result_vec[k] << " loss)";
           }
           LOG_IF(INFO, Caffe::root_solver()) << "    Train net output #"
-              << score_index++ << ": " << output_name << " = "
-              << result_vec[k] << loss_msg_stream.str();
+            << score_index++ << ": " << output_name << " = "
+            << result_vec[k] << loss_msg_stream.str();
         }
       }
+      string gradient_norm = "gradient norm:";
+      for (int k = 0; k < net_->blob_names().size(); k++) {
+        if (net_->blob_names()[k].find("Convolution") != string::npos
+            || net_->blob_names()[k].find("InnerProduct") != string::npos) {
+          gradient_norm += std::to_string(net_->blobs()[k]->asum_diff()) + " ";
+        }
+      }
+      if (gradient_norm.size() > 15) LOG(INFO) << gradient_norm;
     }
     for (int i = 0; i < callbacks_.size(); ++i) {
       callbacks_[i]->on_gradients_ready();

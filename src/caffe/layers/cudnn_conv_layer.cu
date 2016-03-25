@@ -11,14 +11,6 @@ template <typename Dtype>
 void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   const Dtype* weight = this->blobs_[0]->gpu_data();
-  if (use_normlization_) {
-    int fan_in = channels_ * kernel_shape_.gpu_data()[0] * kernel_shape_.gpu_data()[1];
-    Dtype sum_sq;
-    for (int i = 0; i < this->blobs_[0]->num(); i++) {
-      caffe_gpu_dot(fan_in, weight + i * fan_in, weight + i * fan_in, &sum_sq);
-      caffe_gpu_scale<Dtype>(fan_in, normalize_scale_ / sqrt(sum_sq), weight + i * fan_in, this->blobs_[0]->mutable_gpu_data() + i * fan_in);
-    }
-  }
   for (int i = 0; i < bottom.size(); ++i) {
     const Dtype* bottom_data = bottom[i]->gpu_data();
     Dtype* top_data = top[i]->mutable_gpu_data();

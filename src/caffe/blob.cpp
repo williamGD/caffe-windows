@@ -159,6 +159,14 @@ void Blob<Dtype>::Update() {
     caffe_axpy<Dtype>(count_, Dtype(-1),
         static_cast<const Dtype*>(diff_->cpu_data()),
         static_cast<Dtype*>(data_->mutable_cpu_data()));
+    if (use_normalization_) {
+      Dtype sum_sq;
+      int fan_in = count(1);
+      for (int i = 0; i < num(); i++) {
+        sum_sq = caffe_cpu_dot(fan_in, cpu_data() + i * fan_in, cpu_data() + i * fan_in);
+        caffe_cpu_scale<Dtype>(fan_in, normalize_scale_ / sqrt(sum_sq), cpu_data() + i * fan_in, mutable_cpu_data() + i * fan_in);
+      }
+    }
     break;
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
@@ -167,6 +175,15 @@ void Blob<Dtype>::Update() {
     caffe_gpu_axpy<Dtype>(count_, Dtype(-1),
         static_cast<const Dtype*>(diff_->gpu_data()),
         static_cast<Dtype*>(data_->mutable_gpu_data()));
+    if (use_normalization_) {
+      Dtype sum_sq;
+      int fan_in = count(1);
+      for (int i = 0; i < num(); i++) {
+        caffe_gpu_dot(fan_in, gpu_data() + i * fan_in, gpu_data() + i * fan_in, &sum_sq);
+        sum_sq = (sum_sq < 1e-10) ? normalize_scale_ : sum_sq;
+        caffe_gpu_scal(fan_in, normalize_scale_ / sqrt(sum_sq), mutable_gpu_data() + i * fan_in);
+      }
+    }
 #else
     NO_GPU;
 #endif
