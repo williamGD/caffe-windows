@@ -28,15 +28,20 @@ def conv_factory(bottom, ks, nout, stride=1, pad=0):
 def max_pool_3x3(bottom, stride=1):
     pool= L.Pooling(bottom, pool=P.Pooling.MAX, kernel_size=3, stride=stride)
     scale = L.Scale(pool, bias_term=True, 
-                    filler=dict(type='constant',value=0.5978),bias_filler=dict(type='constant', value=0.8877),
+                    filler=dict(type='constant',value=1.6725),bias_filler=dict(type='constant', value=-2.4834),
                     param=[dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0)]);
     return scale
 
 def max_pool_2x2(bottom, stride=1):
     pool= L.Pooling(bottom, pool=P.Pooling.MAX, kernel_size=2, stride=stride)
     scale = L.Scale(pool, bias_term=True, 
-                    filler=dict(type='constant',value=0.7010),bias_filler=dict(type='constant', value=0.7214),
+                    filler=dict(type='constant',value=1.4263),bias_filler=dict(type='constant', value=-1.4675),
                     param=[dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0)]);
+    return scale
+
+def avg_pool(bottom, ks, stride=1):
+    pool= L.Pooling(bottom, pool=P.Pooling.AVE, kernel_size=ks, stride=stride)
+    scale = L.Scale(pool, filler=dict(type='constant',value=ks), param=[dict(lr_mult=0, decay_mult=0)]);
     return scale
 
 def normnet(train_lmdb, test_lmdb, batch_size=256, stages=[2, 2, 2, 2], input_size=28, first_output=32, include_acc=False):
