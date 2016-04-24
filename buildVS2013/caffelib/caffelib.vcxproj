@@ -207,6 +207,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\caffe\3rdparty\hungarian.cpp" />
     <ClCompile Include="..\..\src\caffe\blob.cpp" />
     <ClCompile Include="..\..\src\caffe\common.cpp" />
     <ClCompile Include="..\..\src\caffe\data_reader.cpp" />
@@ -215,6 +216,7 @@
     <ClCompile Include="..\..\src\caffe\layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\absval_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\accuracy_layer.cpp" />
+    <ClCompile Include="..\..\src\caffe\layers\annotated_data_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\argmax_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\base_conv_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\base_data_layer.cpp" />
@@ -237,6 +239,8 @@
     <ClCompile Include="..\..\src\caffe\layers\cudnn_tanh_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\data_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\deconv_layer.cpp" />
+    <ClCompile Include="..\..\src\caffe\layers\detection_evaluate_layer.cpp" />
+    <ClCompile Include="..\..\src\caffe\layers\detection_output_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\dropout_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\dummy_data_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\eltwise_layer.cpp" />
@@ -262,6 +266,7 @@
     <ClCompile Include="..\..\src\caffe\layers\loss_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\lrn_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\memory_data_layer.cpp" />
+    <ClCompile Include="..\..\src\caffe\layers\multibox_loss_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\multinomial_logistic_loss_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\multi_label_image_data_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\mvn_layer.cpp" />
@@ -304,6 +309,7 @@
     <ClCompile Include="..\..\src\caffe\solvers\rmsprop_solver.cpp" />
     <ClCompile Include="..\..\src\caffe\solvers\sgd_solver.cpp" />
     <ClCompile Include="..\..\src\caffe\syncedmem.cpp" />
+    <ClCompile Include="..\..\src\caffe\util\bbox_util.cpp" />
     <ClCompile Include="..\..\src\caffe\util\benchmark.cpp" />
     <ClCompile Include="..\..\src\caffe\util\blocking_queue.cpp" />
     <ClCompile Include="..\..\src\caffe\util\cudnn.cpp" />
@@ -312,13 +318,16 @@
     <ClCompile Include="..\..\src\caffe\util\db_lmdb.cpp" />
     <ClCompile Include="..\..\src\caffe\util\hdf5.cpp" />
     <ClCompile Include="..\..\src\caffe\util\im2col.cpp" />
+    <ClCompile Include="..\..\src\caffe\util\im_transforms.cpp" />
     <ClCompile Include="..\..\src\caffe\util\insert_splits.cpp" />
     <ClCompile Include="..\..\src\caffe\util\io.cpp" />
     <ClCompile Include="..\..\src\caffe\util\math_functions.cpp" />
+    <ClCompile Include="..\..\src\caffe\util\sampler.cpp" />
     <ClCompile Include="..\..\src\caffe\util\signal_handler.cpp" />
     <ClCompile Include="..\..\src\caffe\util\upgrade_proto.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\caffe\3rdparty\hungarian.h" />
     <ClInclude Include="..\..\include\caffe\blob.hpp" />
     <ClInclude Include="..\..\include\caffe\caffe.hpp" />
     <ClInclude Include="..\..\include\caffe\common.hpp" />
@@ -330,6 +339,7 @@
     <ClInclude Include="..\..\include\caffe\layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\absval_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\accuracy_layer.hpp" />
+    <ClInclude Include="..\..\include\caffe\layers\annotated_data_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\argmax_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\base_conv_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\base_data_layer.hpp" />
@@ -350,6 +360,8 @@
     <ClInclude Include="..\..\include\caffe\layers\cudnn_tanh_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\data_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\deconv_layer.hpp" />
+    <ClInclude Include="..\..\include\caffe\layers\detection_evaluate_layer.hpp" />
+    <ClInclude Include="..\..\include\caffe\layers\detection_output_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\dropout_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\dummy_data_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\eltwise_layer.hpp" />
@@ -401,6 +413,7 @@
     <ClInclude Include="..\..\include\caffe\solver.hpp" />
     <ClInclude Include="..\..\include\caffe\solver_factory.hpp" />
     <ClInclude Include="..\..\include\caffe\syncedmem.hpp" />
+    <ClInclude Include="..\..\include\caffe\util\bbox_util.hpp" />
     <ClInclude Include="..\..\include\caffe\util\benchmark.hpp" />
     <ClInclude Include="..\..\include\caffe\util\blocking_queue.hpp" />
     <ClInclude Include="..\..\include\caffe\util\cudnn.hpp" />
@@ -417,6 +430,7 @@
     <ClInclude Include="..\..\include\caffe\util\math_functions.hpp" />
     <ClInclude Include="..\..\include\caffe\util\mkl_alternate.hpp" />
     <ClInclude Include="..\..\include\caffe\util\rng.hpp" />
+    <ClInclude Include="..\..\include\caffe\util\sampler.hpp" />
     <ClInclude Include="..\..\include\caffe\util\signal_handler.h" />
     <ClInclude Include="..\..\include\caffe\util\upgrade_proto.hpp" />
     <ClInclude Include="..\..\src\caffe\proto\caffe.pb.h" />
@@ -442,6 +456,7 @@
     <CudaCompile Include="..\..\src\caffe\layers\cudnn_softmax_layer.cu" />
     <CudaCompile Include="..\..\src\caffe\layers\cudnn_tanh_layer.cu" />
     <CudaCompile Include="..\..\src\caffe\layers\deconv_layer.cu" />
+    <CudaCompile Include="..\..\src\caffe\layers\detection_output_layer.cu" />
     <CudaCompile Include="..\..\src\caffe\layers\dropout_layer.cu" />
     <CudaCompile Include="..\..\src\caffe\layers\eltwise_layer.cu" />
     <CudaCompile Include="..\..\src\caffe\layers\elu_layer.cu" />
@@ -489,6 +504,7 @@
     <CudaCompile Include="..\..\src\caffe\solvers\nesterov_solver.cu" />
     <CudaCompile Include="..\..\src\caffe\solvers\rmsprop_solver.cu" />
     <CudaCompile Include="..\..\src\caffe\solvers\sgd_solver.cu" />
+    <CudaCompile Include="..\..\src\caffe\util\bbox_util.cu" />
     <CudaCompile Include="..\..\src\caffe\util\im2col.cu">
       <FileType>Document</FileType>
     </CudaCompile>
