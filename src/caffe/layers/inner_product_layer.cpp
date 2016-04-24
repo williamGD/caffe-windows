@@ -40,6 +40,7 @@ void InnerProductLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       weight_shape[1] = K_;
     }
     this->blobs_[0].reset(new Blob<Dtype>(weight_shape));
+    if (use_normlization_) this->blobs_[0]->set_normalize_scale(normalize_scale_);
     // fill the weights
     shared_ptr<Filler<Dtype> > weight_filler(GetFiller<Dtype>(
         this->layer_param_.inner_product_param().weight_filler()));
@@ -88,21 +89,13 @@ void InnerProductLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* bottom_data = bottom[0]->cpu_data();
   Dtype* top_data = top[0]->mutable_cpu_data();
   const Dtype* weight = this->blobs_[0]->cpu_data();
-
-  if (use_normlization_) {
-    Dtype sum_sq;
-    for (int i = 0; i < this->blobs_[0]->num(); i++) {
-      sum_sq = caffe_cpu_dot(K_, weight + i * K_, weight + i * K_);
-      caffe_cpu_scale<Dtype>(K_, normalize_scale_ / sqrt(sum_sq), weight + i * K_, this->blobs_[0]->mutable_cpu_data() + i * K_);
-    }
-  }
   caffe_cpu_gemm<Dtype>(CblasNoTrans, transpose_ ? CblasNoTrans : CblasTrans,
-      M_, N_, K_, (Dtype)1.,
-      bottom_data, weight, (Dtype)0., top_data);
+                        M_, N_, K_, (Dtype)1.,
+                        bottom_data, weight, (Dtype)0., top_data);
   if (bias_term_) {
     caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, M_, N_, 1, (Dtype)1.,
-        bias_multiplier_.cpu_data(),
-        this->blobs_[1]->cpu_data(), (Dtype)1., top_data);
+                          bias_multiplier_.cpu_data(),
+                          this->blobs_[1]->cpu_data(), (Dtype)1., top_data);
   }
 }
 
