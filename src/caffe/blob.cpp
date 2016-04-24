@@ -149,6 +149,7 @@ void Blob<Dtype>::ShareDiff(const Blob& other) {
 // Blob<int> or Blob<unsigned int>.
 template <> void Blob<unsigned int>::Update() { NOT_IMPLEMENTED; }
 template <> void Blob<int>::Update() { NOT_IMPLEMENTED; }
+template <> void Blob<bool>::Update() { NOT_IMPLEMENTED; }
 
 template <typename Dtype>
 void Blob<Dtype>::Update() {
@@ -203,6 +204,11 @@ template <> int Blob<int>::asum_data() const {
   return 0;
 }
 
+template <> bool Blob<bool>::asum_data() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+
 template <typename Dtype>
 Dtype Blob<Dtype>::asum_data() const {
   if (!data_) { return 0; }
@@ -238,6 +244,12 @@ template <> int Blob<int>::asum_diff() const {
   return 0;
 }
 
+template <> bool Blob<bool>::asum_diff() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+
+
 template <typename Dtype>
 Dtype Blob<Dtype>::asum_diff() const {
   if (!diff_) { return 0; }
@@ -269,6 +281,11 @@ template <> unsigned int Blob<unsigned int>::sumsq_data() const {
 }
 
 template <> int Blob<int>::sumsq_data() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+
+template <> bool Blob<bool>::sumsq_data() const {
   NOT_IMPLEMENTED;
   return 0;
 }
@@ -310,6 +327,11 @@ template <> int Blob<int>::sumsq_diff() const {
   return 0;
 }
 
+template <> bool Blob<bool>::sumsq_diff() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+
 template <typename Dtype>
 Dtype Blob<Dtype>::sumsq_diff() const {
   Dtype sumsq;
@@ -345,6 +367,10 @@ template <> void Blob<int>::scale_data(int scale_factor) {
   NOT_IMPLEMENTED;
 }
 
+template <> void Blob<bool>::scale_data(bool scale_factor) {
+  NOT_IMPLEMENTED;
+}
+
 template <typename Dtype>
 void Blob<Dtype>::scale_data(Dtype scale_factor) {
   Dtype* data;
@@ -375,6 +401,10 @@ template <> void Blob<unsigned int>::scale_diff(unsigned int scale_factor) {
 }
 
 template <> void Blob<int>::scale_diff(int scale_factor) {
+  NOT_IMPLEMENTED;
+}
+
+template <> void Blob<bool>::scale_diff(bool scale_factor) {
   NOT_IMPLEMENTED;
 }
 
@@ -551,6 +581,7 @@ void Blob<float>::ToProto(BlobProto* proto, bool write_diff) const {
 }
 
 INSTANTIATE_CLASS(Blob);
+template class Blob<bool>;
 template class Blob<int>;
 template class Blob<unsigned int>;
 
