@@ -5,11 +5,11 @@ import caffe
 
 # helper function for common structures
 
-sigmoid_scale = 0.3673#0.2084
+sigmoid_scale = 0.3144#0.3673#0.2084
 sigmoid_bias = 0.1837#0.1042
 
 def ip_factory(bottom, nout):
-    ip = L.InnerProduct(bottom, num_output=nout, normalize_scale=3.0, weight_filler=dict(type='xavier'))
+    ip = L.InnerProduct(bottom, num_output=nout, normalize_scale=2.0, weight_filler=dict(type='xavier'))
     sigmoid = L.Sigmoid(ip, in_place = True);
     scale = L.Scale(sigmoid, bias_term=True, 
                     filler=dict(type='constant',value= 1.0 / sigmoid_scale),bias_filler=dict(type='constant', value=-0.5 / sigmoid_scale),
@@ -17,7 +17,7 @@ def ip_factory(bottom, nout):
     return scale
 
 def conv_factory(bottom, ks, nout, stride=1, pad=0):
-    conv = L.Convolution(bottom, kernel_size=ks, stride=stride, normalize_scale=3.0,
+    conv = L.Convolution(bottom, kernel_size=ks, stride=stride, normalize_scale=2.0,
                                 num_output=nout, pad=pad, bias_term=False, weight_filler=dict(type='msra'))
     sigmoid = L.Sigmoid(conv, in_place = True);
     scale = L.Scale(sigmoid, bias_term=True, 
@@ -57,7 +57,7 @@ def DownsampleFactory(bottom, ch3x3):
     concat = L.Concat(conv3x3, pool)
     return concat
 
-def normnet(train_lmdb, test_lmdb, batch_size=256, stages=[2, 2, 2, 2], input_size=28, first_output=32, include_acc=False):
+def normnet(train_lmdb, test_lmdb, batch_size=256, stages=[2, 2, 2, 2], input_size=32, first_output=32, include_acc=False):
     # now, this code can't recognize include phase, so there will only be a TEST phase data layer
     data, label = L.Data(source=train_lmdb, backend=P.Data.LMDB, batch_size=batch_size, ntop=2,
         transform_param=dict(crop_size=227, mean_value=[104, 117, 123], mirror=True),
@@ -85,7 +85,7 @@ def normnet(train_lmdb, test_lmdb, batch_size=256, stages=[2, 2, 2, 2], input_si
     in5a = SimpleFactory(in4e, 176, 160)
     in5b = SimpleFactory(in5a, 176, 160)
 
-    pool = avg_pool(in5b, 7)
+    pool = avg_pool(in5b, 8)
 
     fc = L.InnerProduct(pool, num_output=10, weight_filler=dict(type='xavier'))
     loss = L.SoftmaxWithLoss(fc, label)
