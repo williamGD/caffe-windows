@@ -192,7 +192,6 @@ void Solver<Dtype>::InitTestNets() {
 
 template <typename Dtype>
 void Solver<Dtype>::Step(int iters) {
-  vector<Blob<Dtype>*> bottom_vec;
   const int start_iter = iter_;
   const int stop_iter = iter_ + iters;
   int average_loss = this->param_.average_loss();
@@ -220,7 +219,7 @@ void Solver<Dtype>::Step(int iters) {
     // accumulate the loss and gradient
     Dtype loss = 0;
     for (int i = 0; i < param_.iter_size(); ++i) {
-      loss += net_->ForwardBackward(bottom_vec);
+      loss += net_->ForwardBackward();
     }
     loss /= param_.iter_size();
     if (isnan(loss)) {
@@ -261,14 +260,14 @@ void Solver<Dtype>::Step(int iters) {
         }
       }
       if (gradient_norm.size() > 20) LOG(INFO) << gradient_norm;
-      gradient_norm = "weight blob norm:";
+      string weight_gradient_norm = "weight blob norm:";
       for (int k = 0; k < net_->layers().size(); k++) {
         if (strstr(net_->layers()[k]->type(), "Convolution") != NULL
             || strstr(net_->layers()[k]->type(), "InnerProduct") != NULL) {
-          gradient_norm += std::to_string(net_->layers()[k]->blobs()[0]->asum_diff() / net_->layers()[k]->blobs()[0]->count()) + " ";
+          weight_gradient_norm += std::to_string(net_->layers()[k]->blobs()[0]->asum_diff() / net_->layers()[k]->blobs()[0]->count()) + " ";
         }
       }
-      if (gradient_norm.size() > 20) LOG(INFO) << gradient_norm;
+      if (weight_gradient_norm.size() > 20) LOG(INFO) << weight_gradient_norm;
     }
     for (int i = 0; i < callbacks_.size(); ++i) {
       callbacks_[i]->on_gradients_ready();
@@ -333,7 +332,7 @@ void Solver<Dtype>::Solve(const char* resume_file) {
   if (param_.display() && iter_ % param_.display() == 0) {
     int average_loss = this->param_.average_loss();
     Dtype loss;
-    net_->ForwardPrefilled(&loss);
+    net_->Forward(&loss);
 
     UpdateSmoothedLoss(loss, start_iter, average_loss);
 
@@ -363,7 +362,6 @@ void Solver<Dtype>::Test(const int test_net_id) {
       ShareTrainedLayersWith(net_.get());
   vector<Dtype> test_score;
   vector<int> test_score_output_id;
-  vector<Blob<Dtype>*> bottom_vec;
   const shared_ptr<Net<Dtype> >& test_net = test_nets_[test_net_id];
   Dtype loss = 0;
   for (int i = 0; i < param_.test_iter(test_net_id); ++i) {
@@ -384,7 +382,7 @@ void Solver<Dtype>::Test(const int test_net_id) {
 
     Dtype iter_loss;
     const vector<Blob<Dtype>*>& result =
-        test_net->Forward(bottom_vec, &iter_loss);
+        test_net->Forward(&iter_loss);
     if (param_.test_compute_loss()) {
       loss += iter_loss;
     }

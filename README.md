@@ -1,14 +1,14 @@
-**News:** Now the offical caffe has merged the windows fork maintained by Microsoft: https://github.com/BVLC/caffe/tree/windows . 
+**News:** Now the offical caffe has merged the windows fork maintained by [Microsoft](https://github.com/microsoft/caffe): https://github.com/BVLC/caffe/tree/windows . 
 
-I think it is time to turn your code to the official version. This repository, `caffe-windows`, will be used for my personal research in the future. Thank you all guys who has been making contribution to the windows version of Caffe! 
+I think it is time to turn your code to the official version. This repository, `caffe-windows`, will be used for my personal research in the future. Thank you all guys who have been making contribution to the windows version of Caffe! 
 
-People who do research in Facial Analysis or Visualization may continue to follow my repository. I will keep updating layers and scripts used by these two areas. 
+People who do research in Facial Analysis or Visualization may continue to follow my repository. I will keep updating layers and scripts of these two areas. 
 
 I have made a list of some frequently asked questions in [FAQ.md](FAQ.md). If you get confused during configuring, please firstly look up for your question in the [FAQ.md](FAQ.md). This FAQ list is still under construction, I will keep adding questions into it.
 
 ## Setup step:
 
-1. Download third-party libraries from [BaiduYun Disk](http://pan.baidu.com/s/1sk3QyyL) or [OneDrive](http://1drv.ms/23KkbTk) and extract the files to `caffe-windows_root/3rdparty/`. **Please don't forget to add the `./3rdparty/bin` folder to your environment variable `PATH`.**
+1. Download third-party libraries from [BaiduYun Disk](http://pan.baidu.com/s/1bSzvKa) or [OneDrive](https://onedrive.live.com/redir?resid=A7AB61436C858EB9!1132&authkey=!ADcB9acqOBEE1Vg&ithint=file%2crar) and extract the files to `caffe-windows_root/3rdparty/`. **Please don't forget to add the `./3rdparty/bin` folder to your environment variable `PATH`.**
 
 2. Run `./src/caffe/proto/extract_proto.bat` to create `caffe.pb.h`, `caffe.pb.cc` and `caffe_pb2.py`.
 
