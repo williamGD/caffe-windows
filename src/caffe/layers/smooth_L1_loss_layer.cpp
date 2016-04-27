@@ -13,6 +13,7 @@ template <typename Dtype>
 void SmoothL1LossLayer<Dtype>::LayerSetUp(
   const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   has_weights_ = (bottom.size() == 3);
+  turn_point_ = this->layer_param_.smoothl1_param().turn_point();
 }
 
 template <typename Dtype>
