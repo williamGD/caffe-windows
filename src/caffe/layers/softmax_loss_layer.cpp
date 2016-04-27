@@ -44,6 +44,7 @@ void SoftmaxWithLossLayer<Dtype>::Reshape(
       bottom[0]->CanonicalAxisIndex(this->layer_param_.softmax_param().axis());
   outer_num_ = bottom[0]->count(0, softmax_axis_);
   inner_num_ = bottom[0]->count(softmax_axis_ + 1);
+  counts_.Reshape({ outer_num_, inner_num_ });
   CHECK_EQ(outer_num_ * inner_num_, bottom[1]->count())
       << "Number of labels must match number of predictions; "
       << "e.g., if softmax axis == 1 and prediction shape is (N, C, H, W), "
@@ -61,7 +62,7 @@ void SoftmaxWithLossLayer<Dtype>::Reshape(
 
 template <typename Dtype>
 Dtype SoftmaxWithLossLayer<Dtype>::get_normalizer(
-    LossParameter_NormalizationMode normalization_mode, int valid_count) {
+    LossParameter_NormalizationMode normalization_mode, Dtype valid_count) {
   Dtype normalizer;
   switch (normalization_mode) {
     case LossParameter_NormalizationMode_FULL:
@@ -71,7 +72,7 @@ Dtype SoftmaxWithLossLayer<Dtype>::get_normalizer(
       if (valid_count == -1) {
         normalizer = Dtype(outer_num_ * inner_num_);
       } else {
-        normalizer = Dtype(valid_count);
+        normalizer = valid_count;
       }
       break;
     case LossParameter_NormalizationMode_BATCH_SIZE:
@@ -97,7 +98,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_cpu(
   const Dtype* prob_data = prob_.cpu_data();
   const Dtype* label = bottom[1]->cpu_data();
   int dim = prob_.count() / outer_num_;
-  int count = 0;
+  Dtype count = 0;
   Dtype loss = 0;
   if (bottom.size() == 2) {
     for (int i = 0; i < outer_num_; ++i) {
@@ -110,7 +111,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_cpu(
         DCHECK_LT(label_value, prob_.shape(softmax_axis_));
         loss -= log(std::max(prob_data[i * dim + label_value * inner_num_ + j],
           Dtype(FLT_MIN)));
-        ++count;
+        count += 1;
       }
     }
   }
@@ -128,7 +129,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_cpu(
         DCHECK_LT(label_value, prob_.shape(softmax_axis_));
         loss -= weight_value * log(std::max(prob_data[i * dim + label_value * inner_num_ + j],
           Dtype(FLT_MIN)));
-        ++count;
+        count += weight_value;
       }
     }
   }
@@ -151,7 +152,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     caffe_copy(prob_.count(), prob_data, bottom_diff);
     const Dtype* label = bottom[1]->cpu_data();
     int dim = prob_.count() / outer_num_;
-    int count = 0;
+    Dtype count = 0;
     if (bottom.size() == 2) {
       for (int i = 0; i < outer_num_; ++i) {
         for (int j = 0; j < inner_num_; ++j) {
@@ -163,7 +164,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
           }
           else {
             bottom_diff[i * dim + label_value * inner_num_ + j] -= 1;
-            ++count;
+            count += 1;
           }
         }
       }
@@ -181,7 +182,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
           }
           else {
             bottom_diff[i * dim + label_value * inner_num_ + j] -= weight_value;
-            if(weight_value != 0) ++count;
+            if(weight_value != 0) count += weight_value;
           }
         }
       }

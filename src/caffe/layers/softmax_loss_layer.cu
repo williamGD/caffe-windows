@@ -39,14 +39,14 @@ __global__ void SoftmaxLossForwardWithWeightsGPU(const int nthreads,
     const int s = index % spatial_dim;
     const int label_value = static_cast<int>(label[n * spatial_dim + s]);
     const Dtype weight_value = weights[n * spatial_dim + s];
-    if (has_ignore_label_ && label_value == ignore_label_) {
+    if ((weight_value == 0) || (has_ignore_label_ && label_value == ignore_label_)) {
       loss[index] = 0;
       counts[index] = 0;
     }
     else {
       loss[index] = -weight_value * log(max(prob_data[n * dim + label_value * spatial_dim + s],
         Dtype(FLT_MIN)));
-      counts[index] = 1;
+      counts[index] = weight_value;
     }
   }
 }
@@ -65,7 +65,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
   Dtype* loss_data = bottom[0]->mutable_gpu_diff();
   // Similarly, this memory is never used elsewhere, and thus we can use it
   // to avoid having to allocate additional GPU memory.
-  Dtype* counts = prob_.mutable_gpu_diff();
+  Dtype* counts = counts_.mutable_gpu_diff();
   if (bottom.size() == 2) {
     // NOLINT_NEXT_LINE(whitespace/operators)
     SoftmaxLossForwardGPU<Dtype> << <CAFFE_GET_BLOCKS(nthreads),
@@ -84,8 +84,8 @@ void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
   Dtype valid_count = -1;
   // Only launch another CUDA kernel if we actually need the count of valid
   // outputs.
-  if (normalization_ == LossParameter_NormalizationMode_VALID &&
-      has_ignore_label_) {
+  if ((normalization_ == LossParameter_NormalizationMode_VALID && has_ignore_label_)
+      ||(bottom.size() == 3)) {
     caffe_gpu_asum(nthreads, counts, &valid_count);
   }
   top[0]->mutable_cpu_data()[0] = loss / get_normalizer(normalization_,
@@ -139,7 +139,7 @@ __global__ void SoftmaxLossBackwardWithWeightsGPU(const int nthreads, const Dtyp
     }
     else {
       bottom_diff[n * dim + label_value * spatial_dim + s] -= weight_value;
-      counts[index] = 1;
+      counts[index] = weight_value;
     }
   }
 }
@@ -161,7 +161,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const int nthreads = outer_num_ * inner_num_;
     // Since this memory is never used for anything else,
     // we use to to avoid allocating new GPU memory.
-    Dtype* counts = prob_.mutable_gpu_diff();
+    Dtype* counts = counts_.mutable_gpu_diff();
     if (bottom.size() == 2) {
       // NOLINT_NEXT_LINE(whitespace/operators)
       SoftmaxLossBackwardGPU<Dtype> << <CAFFE_GET_BLOCKS(nthreads),
@@ -179,8 +179,8 @@ void SoftmaxWithLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     Dtype valid_count = -1;
     // Only launch another CUDA kernel if we actually need the count of valid
     // outputs.
-    if (normalization_ == LossParameter_NormalizationMode_VALID &&
-        has_ignore_label_) {
+    if ((normalization_ == LossParameter_NormalizationMode_VALID && has_ignore_label_)
+        || (bottom.size() == 3)) {
       caffe_gpu_asum(nthreads, counts, &valid_count);
     }
     const Dtype loss_weight = top[0]->cpu_diff()[0] /
