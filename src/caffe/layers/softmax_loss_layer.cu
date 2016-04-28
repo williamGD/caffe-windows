@@ -65,7 +65,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
   Dtype* loss_data = bottom[0]->mutable_gpu_diff();
   // Similarly, this memory is never used elsewhere, and thus we can use it
   // to avoid having to allocate additional GPU memory.
-  Dtype* counts = counts_.mutable_gpu_diff();
+  Dtype* counts = counts_.mutable_gpu_data();
   if (bottom.size() == 2) {
     // NOLINT_NEXT_LINE(whitespace/operators)
     SoftmaxLossForwardGPU<Dtype> << <CAFFE_GET_BLOCKS(nthreads),
@@ -138,7 +138,10 @@ __global__ void SoftmaxLossBackwardWithWeightsGPU(const int nthreads, const Dtyp
       counts[index] = 0;
     }
     else {
-      bottom_diff[n * dim + label_value * spatial_dim + s] -= weight_value;
+      bottom_diff[n * dim + label_value * spatial_dim + s] -= 1;
+      for (int c = 0; c < channels; ++c) {
+        bottom_diff[n * dim + c * spatial_dim + s] *= weight_value;
+      }
       counts[index] = weight_value;
     }
   }
@@ -161,7 +164,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const int nthreads = outer_num_ * inner_num_;
     // Since this memory is never used for anything else,
     // we use to to avoid allocating new GPU memory.
-    Dtype* counts = counts_.mutable_gpu_diff();
+    Dtype* counts = counts_.mutable_gpu_data();
     if (bottom.size() == 2) {
       // NOLINT_NEXT_LINE(whitespace/operators)
       SoftmaxLossBackwardGPU<Dtype> << <CAFFE_GET_BLOCKS(nthreads),
