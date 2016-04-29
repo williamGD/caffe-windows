@@ -145,6 +145,13 @@ __global__ void SoftmaxLossBackwardWithWeightsGPU(const int nthreads, const Dtyp
 }
 
 template <typename Dtype>
+__global__ void Threshold(const int n, const Dtype* loss, Dtype threshold, Dtype* out) {
+  CUDA_KERNEL_LOOP(index, n) {
+    out[index] = loss[index] < threshold ? 0 : out[index];
+  }
+}
+
+template <typename Dtype>
 void SoftmaxWithLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
   if (propagate_down[1]) {
@@ -152,6 +159,14 @@ void SoftmaxWithLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
                << " Layer cannot backpropagate to label inputs.";
   }
   if (propagate_down[0]) {
+    if (bottom.size() == 3) {
+      std::sort(bottom[0]->mutable_cpu_diff(), bottom[0]->mutable_cpu_diff() + outer_num_ * inner_num_);
+      Dtype loss_threshold = bottom[0]->cpu_diff()[(int)(outer_num_ * inner_num_ * 0.3)];
+      // NOLINT_NEXT_LINE(whitespace/operators)
+      Threshold<Dtype> << <CAFFE_GET_BLOCKS(outer_num_ * inner_num_), CAFFE_CUDA_NUM_THREADS >> >(
+        outer_num_ * inner_num_, bottom[0]->gpu_diff(), loss_threshold, bottom[2]->mutable_gpu_data());
+    }
+
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
     const Dtype* prob_data = prob_.gpu_data();
     const Dtype* top_data = top[0]->gpu_data();
