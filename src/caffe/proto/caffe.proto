@@ -430,7 +430,7 @@ message ParamSpec {
 // NOTE
 // Update the next available ID when you add a new LayerParameter field.
 //
-// LayerParameter next available layer-specific ID: 155 (last added: smoothl1_param)
+// LayerParameter next available layer-specific ID: 156 (last added: predict_box_param)
 message LayerParameter {
   optional string name = 1; // the layer name
   optional string type = 2; // the layer type
@@ -541,6 +541,7 @@ message LayerParameter {
   optional NoiseLayerParameter noise_param = 147;
   optional HotspotParameter hotspot_param = 151;
   optional SmoothL1Parameter smoothl1_param = 154;
+  optional PredictBoxParameter predict_box_param = 155;
 }
 
 // Message that stores parameters used to apply transformation
@@ -1882,4 +1883,12 @@ message HotspotParameter {
 
 message SmoothL1Parameter {
   optional float turn_point = 1 [default = 1];
+}
+
+message PredictBoxParameter {
+  optional uint32 stride = 1 [default = 2];
+  optional uint32 receptive_field = 2 [default = 12];
+  optional bool nms = 3 [default = true];
+  optional bool output_vector = 4 [default = true];
+  optional float positive_thresh = 5 [default = 0.5];
 }

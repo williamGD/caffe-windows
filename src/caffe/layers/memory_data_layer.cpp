@@ -63,6 +63,10 @@ void MemoryDataLayer<Dtype>::AddMatVector(const vector<cv::Mat>& mat_vector,
   CHECK_GT(num, 0) << "There is no mat to add";
   CHECK_EQ(num % batch_size_, 0) <<
       "The added data must be a multiple of the batch size.";
+  if (height_ != mat_vector[0].rows || width_ != mat_vector[0].cols) {
+    height_ = mat_vector[0].rows;
+    width_ = mat_vector[0].cols;
+  }
   added_data_.Reshape(num, channels_, height_, width_);
   added_label_.Reshape(num, 1, 1, 1);
   // Apply data transformations (mirror, scale, crop...)
@@ -102,6 +106,15 @@ void MemoryDataLayer<Dtype>::set_batch_size(int new_size) {
   batch_size_ = new_size;
   added_data_.Reshape(batch_size_, channels_, height_, width_);
   added_label_.Reshape(batch_size_, 1, 1, 1);
+}
+
+template <typename Dtype>
+void MemoryDataLayer<Dtype>::set_spatial_size(int new_height, int new_width) {
+  CHECK(!has_new_data_) <<
+    "Can't change batch_size until current data has been consumed.";
+  height_ = new_height;
+  width_ = new_width;
+  added_data_.Reshape(batch_size_, channels_, height_, width_);
 }
 
 template <typename Dtype>
