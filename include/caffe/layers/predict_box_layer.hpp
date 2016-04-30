@@ -29,7 +29,6 @@ class PredictBoxLayer : public Layer<Dtype> {
       const vector<Blob<Dtype>*>& top);
 
   virtual inline const char* type() const { return "PredictBox"; }
-  virtual inline int ExactBottomBlobs() const { return 2; }
 
  protected:
   /**
@@ -56,6 +55,7 @@ class PredictBoxLayer : public Layer<Dtype> {
   int receptive_field_;
   int stride_;
   bool nms_;
+  bool bounding_box_regression_;
   bool output_vector_;
   Dtype positive_thresh_;
 };
