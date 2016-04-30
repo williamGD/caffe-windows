@@ -333,6 +333,9 @@
     <ClCompile Include="..\..\src\caffe\util\im_transforms.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\caffe\layers\predict_box_layer.cpp">
+      <Filter>layers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\caffe\proto\caffe.pb.h">

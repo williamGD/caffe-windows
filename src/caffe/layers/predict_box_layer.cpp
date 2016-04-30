@@ -30,7 +30,7 @@ void PredictBoxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
     CHECK_EQ(top.size(), 2);
   }
 
-  top[0]->ReshapeLike(*bottom[0]);
+  top[0]->Reshape({ bottom[0]->num(), 5, bottom[0]->height(), bottom[0]->width() });
   if (output_vector_) {
     top[1]->Reshape({ bottom[0]->num(), 1, 5 });//will be modified on the fly.
   }
@@ -55,6 +55,7 @@ void PredictBoxLayer<Dtype>::Forward_cpu(
           bb_data[top[0]->offset(n, 1, y, x)] = y * stride_ + bbr_data[bottom[0]->offset(n, 1, y, x)] * receptive_field_;
           bb_data[top[0]->offset(n, 2, y, x)] = receptive_field_ * exp(bbr_data[bottom[0]->offset(n, 2, y, x)]);
           bb_data[top[0]->offset(n, 3, y, x)] = receptive_field_ * exp(bbr_data[bottom[0]->offset(n, 3, y, x)]);
+          bb_data[top[0]->offset(n, 4, y, x)] = score_data[bottom[1]->offset(n, 1, y, x)];
           count++;
         }
       }

@@ -63,10 +63,8 @@ void MemoryDataLayer<Dtype>::AddMatVector(const vector<cv::Mat>& mat_vector,
   CHECK_GT(num, 0) << "There is no mat to add";
   CHECK_EQ(num % batch_size_, 0) <<
       "The added data must be a multiple of the batch size.";
-  if (height_ != mat_vector[0].rows || width_ != mat_vector[0].cols) {
-    height_ = mat_vector[0].rows;
-    width_ = mat_vector[0].cols;
-  }
+  height_ = mat_vector[0].rows;
+  width_ = mat_vector[0].cols;
   added_data_.Reshape(num, channels_, height_, width_);
   added_label_.Reshape(num, 1, 1, 1);
   // Apply data transformations (mirror, scale, crop...)
