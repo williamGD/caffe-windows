@@ -13,7 +13,8 @@ void PredictBoxLayer<Dtype>::LayerSetUp(
   PredictBoxParameter predict_box_param = this->layer_param_.predict_box_param();
   stride_ = predict_box_param.stride();
   receptive_field_ = predict_box_param.receptive_field();
-  nms_ = predict_box_param.nms();
+  //nms_ = predict_box_param.nms();
+  nms_ = (bottom.size() == 3);
   output_vector_ = predict_box_param.output_vector();
   positive_thresh_ = predict_box_param.positive_thresh();
 }
@@ -28,6 +29,12 @@ void PredictBoxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   CHECK_EQ(bottom[1]->channels(), 2);
   if (output_vector_) {
     CHECK_EQ(top.size(), 2);
+  }
+  if (nms_) {
+    CHECK_EQ(bottom[1]->num(), bottom[2]->num());
+    CHECK_EQ(bottom[1]->channels(), bottom[2]->channels());
+    CHECK_EQ(bottom[1]->height(), bottom[2]->height());
+    CHECK_EQ(bottom[1]->width(), bottom[2]->width());
   }
 
   top[0]->Reshape({ bottom[0]->num(), 5, bottom[0]->height(), bottom[0]->width() });
@@ -50,7 +57,9 @@ void PredictBoxLayer<Dtype>::Forward_cpu(
   for (int n = 0; n < num; n++) {
     for (int x = 0; x < output_width; x ++) {
       for (int y = 0; y < output_height; y ++) {
-        if (score_data[bottom[1]->offset(n, 1, y, x)] > positive_thresh_) {
+        if ((!nms_ && score_data[bottom[1]->offset(n, 1, y, x)] > positive_thresh_) ||
+            (nms_ && score_data[bottom[1]->offset(n, 1, y, x)] > positive_thresh_ && 
+            score_data[bottom[1]->offset(n, 1, y, x)] > bottom[2]->cpu_data()[bottom[2]->offset(n, 1, y, x)] - 1e-5)) {
           bb_data[top[0]->offset(n, 0, y, x)] = x * stride_ + bbr_data[bottom[0]->offset(n, 0, y, x)] * receptive_field_;
           bb_data[top[0]->offset(n, 1, y, x)] = y * stride_ + bbr_data[bottom[0]->offset(n, 1, y, x)] * receptive_field_;
           bb_data[top[0]->offset(n, 2, y, x)] = receptive_field_ * exp(bbr_data[bottom[0]->offset(n, 2, y, x)]);
