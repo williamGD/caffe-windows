@@ -31,7 +31,8 @@ namespace caffe {
 
   template <typename Dtype>
   __global__ void SoftmaxLossForwardWithWeightsGPU(const int nthreads,
-                                                   const Dtype* prob_data, const Dtype* label, const Dtype* weights, Dtype* loss,
+                                                   const Dtype* prob_data, const Dtype* label, Dtype* loss,
+                                                   const Dtype* weights, const Dtype* class_weights,
                                                    const int num, const int dim, const int spatial_dim,
                                                    const bool has_ignore_label_, const int ignore_label_,
                                                    Dtype* counts) {
@@ -39,7 +40,7 @@ namespace caffe {
       const int n = index / spatial_dim;
       const int s = index % spatial_dim;
       const int label_value = static_cast<int>(label[n * spatial_dim + s]);
-      const Dtype weight_value = weights[n * spatial_dim + s];
+      const Dtype weight_value = weights[n * spatial_dim + s] * class_weights[label_value];
       if ((weight_value == 0) || (has_ignore_label_ && label_value == ignore_label_)) {
         loss[index] = 0;
         counts[index] = 0;
@@ -77,7 +78,8 @@ namespace caffe {
       const Dtype* weights = bottom[2]->gpu_data();
       // NOLINT_NEXT_LINE(whitespace/operators)
       SoftmaxLossForwardWithWeightsGPU<Dtype> << <CAFFE_GET_BLOCKS(nthreads),
-        CAFFE_CUDA_NUM_THREADS >> >(nthreads, prob_data, label, weights, loss_data,
+        CAFFE_CUDA_NUM_THREADS >> >(nthreads, prob_data, label, loss_data, 
+        weights, class_weight_.gpu_data(),
         outer_num_, dim, inner_num_, has_ignore_label_, ignore_label_, counts);
     }
     Dtype loss;
@@ -123,7 +125,8 @@ namespace caffe {
 
   template <typename Dtype>
   __global__ void SoftmaxLossBackwardWithWeightsGPU(const int nthreads, const Dtype* top,
-                                                    const Dtype* label, const Dtype* weights, Dtype* bottom_diff, const int num, const int dim,
+                                                    const Dtype* weights, const Dtype* class_weight,
+                                                    const Dtype* label, Dtype* bottom_diff, const int num, const int dim,
                                                     const int spatial_dim, const bool has_ignore_label_,
                                                     const int ignore_label_, Dtype* counts) {
     const int channels = dim / spatial_dim;
@@ -132,7 +135,7 @@ namespace caffe {
       const int n = index / spatial_dim;
       const int s = index % spatial_dim;
       const int label_value = static_cast<int>(label[n * spatial_dim + s]);
-      const Dtype weight_value = weights[n * spatial_dim + s];
+      const Dtype weight_value = weights[n * spatial_dim + s] * class_weight[label_value];
       if ((has_ignore_label_ && label_value == ignore_label_) || (weight_value == 0)) {
         for (int c = 0; c < channels; ++c) {
           bottom_diff[n * dim + c * spatial_dim + s] = 0;
@@ -192,7 +195,8 @@ namespace caffe {
         const Dtype* weights = bottom[2]->gpu_data();
         // NOLINT_NEXT_LINE(whitespace/operators)
         SoftmaxLossBackwardWithWeightsGPU<Dtype> << <CAFFE_GET_BLOCKS(nthreads),
-          CAFFE_CUDA_NUM_THREADS >> >(nthreads, top_data, label, weights, bottom_diff,
+          CAFFE_CUDA_NUM_THREADS >> >(nthreads, top_data, 
+          weights, class_weight_.gpu_data(), label, bottom_diff,
           outer_num_, dim, inner_num_, has_ignore_label_, ignore_label_, counts);
       }
 

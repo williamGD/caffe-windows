@@ -29,6 +29,25 @@ void SoftmaxWithLossLayer<Dtype>::LayerSetUp(
     this->layer_param_.softmax_param().has_hard_ratio();
   if (has_hard_ratio_) {
     hard_ratio_ = this->layer_param_.softmax_param().hard_ratio();
+    CHECK_GE(hard_ratio_, 0);
+    CHECK_LE(hard_ratio_, 1);
+  }
+  has_class_weight_ =
+    this->layer_param_.softmax_param().has_class_weight();
+  if (has_class_weight_) {
+    class_weight_.Reshape({ bottom[0]->shape(1) });
+    CHECK_EQ(this->layer_param_.softmax_param().class_weight().size(), bottom[0]->shape(1));
+    for (int i = 0; i < bottom[0]->shape(1); i++) {
+      class_weight_.cpu_data()[i] = (Dtype)this->layer_param_.softmax_param().class_weight()[i];
+    }
+  }
+  else {
+    if (bottom.size() == 3) {
+      class_weight_.Reshape({ bottom[0]->shape(1) });
+      for (int i = 0; i < bottom[0]->shape(1); i++) {
+        class_weight_.cpu_data()[i] = (Dtype)1.0;
+      }
+    }
   }
   if (!this->layer_param_.loss_param().has_normalization() &&
       this->layer_param_.loss_param().has_normalize()) {
@@ -62,6 +81,9 @@ void SoftmaxWithLossLayer<Dtype>::Reshape(
   if (top.size() >= 2) {
     // softmax output
     top[1]->ReshapeLike(*bottom[0]);
+  }
+  if (has_class_weight_) {
+    CHECK_EQ(class_weight_.size(), bottom[0]->shape(1));
   }
 }
 
@@ -125,7 +147,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_cpu(
     for (int i = 0; i < outer_num_; ++i) {
       for (int j = 0; j < inner_num_; j++) {
         const int label_value = static_cast<int>(label[i * inner_num_ + j]);
-        const Dtype weight_value = weights[i * inner_num_ + j];
+        const Dtype weight_value = weights[i * inner_num_ + j] * (has_class_weight_? class_weight_[label_value] : 1.0);
         if (weight_value == 0) continue;
         if (has_ignore_label_ && label_value == ignore_label_) {
           continue;
@@ -179,7 +201,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
       for (int i = 0; i < outer_num_; ++i) {
         for (int j = 0; j < inner_num_; ++j) {
           const int label_value = static_cast<int>(label[i * inner_num_ + j]);
-          const Dtype weight_value = weights[i * inner_num_ + j];
+          const Dtype weight_value = weights[i * inner_num_ + j] * (has_class_weight_ ? class_weight_[label_value] : 1.0);
           if (has_ignore_label_ && label_value == ignore_label_) {
             for (int c = 0; c < bottom[0]->shape(softmax_axis_); ++c) {
               bottom_diff[i * dim + c * inner_num_ + j] = 0;
