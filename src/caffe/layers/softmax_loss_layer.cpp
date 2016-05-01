@@ -25,6 +25,11 @@ void SoftmaxWithLossLayer<Dtype>::LayerSetUp(
   if (has_ignore_label_) {
     ignore_label_ = this->layer_param_.loss_param().ignore_label();
   }
+  has_hard_ratio_ =
+    this->layer_param_.softmax_param().has_hard_ratio();
+  if (has_hard_ratio_) {
+    hard_ratio_ = this->layer_param_.softmax_param().hard_ratio();
+  }
   if (!this->layer_param_.loss_param().has_normalization() &&
       this->layer_param_.loss_param().has_normalize()) {
     normalization_ = this->layer_param_.loss_param().normalize() ?

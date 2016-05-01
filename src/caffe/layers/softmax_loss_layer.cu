@@ -164,9 +164,9 @@ namespace caffe {
         << " Layer cannot backpropagate to label inputs.";
     }
     if (propagate_down[0]) {
-      if (bottom.size() == 3) {
+      if (has_hard_ratio_ && bottom.size() == 3) {
         std::sort(bottom[0]->mutable_cpu_diff(), bottom[0]->mutable_cpu_diff() + outer_num_ * inner_num_);
-        Dtype loss_threshold = bottom[0]->cpu_diff()[(int)(outer_num_ * inner_num_ * 0.3)];
+        Dtype loss_threshold = bottom[0]->cpu_diff()[(int)(outer_num_ * inner_num_ * (1 - hard_ratio_))];
         // NOLINT_NEXT_LINE(whitespace/operators)
         Threshold<Dtype> << <CAFFE_GET_BLOCKS(outer_num_ * inner_num_), CAFFE_CUDA_NUM_THREADS >> >(
           outer_num_ * inner_num_, bottom[0]->gpu_diff(), loss_threshold, bottom[2]->mutable_gpu_data());

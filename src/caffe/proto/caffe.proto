@@ -1516,6 +1516,7 @@ message SoftmaxParameter {
   // from the end (e.g., -1 for the last axis).
   // Any other axes will be evaluated as independent softmaxes.
   optional int32 axis = 2 [default = 1];
+  optional float hard_ratio = 3 [default = 1];
 }
 
 message TanHParameter {
