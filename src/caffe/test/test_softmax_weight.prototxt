@@ -1,0 +1,39 @@
+name: "test_softmax_weight"
+force_backward: true
+layer {
+  name: "data"
+  type: "Input"
+  top: "feature"
+  input_param {
+    shape: { dim: 100 dim: 2 }
+  }
+}
+layer {
+  name: "data"
+  type: "Input"
+  top: "class_label"
+  input_param {
+    shape: { dim: 100 dim: 1 }
+  }
+}
+layer {
+  name: "data"
+  type: "Input"
+  top: "class_weight"
+  input_param {
+    shape: { dim: 100 dim: 1 }
+  }
+}
+layer {
+  name: "Softmax_Classification"
+  type: "SoftmaxWithLoss"
+  bottom: "feature"
+  bottom: "class_label"
+  bottom: "class_weight"
+  top: "Softmax_Classification"
+  softmax_param {
+    hard_ratio: 0.7
+    class_weight: 0.5
+    class_weight: 1
+  }
+}

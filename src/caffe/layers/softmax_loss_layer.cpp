@@ -32,8 +32,7 @@ void SoftmaxWithLossLayer<Dtype>::LayerSetUp(
     CHECK_GE(hard_ratio_, 0);
     CHECK_LE(hard_ratio_, 1);
   }
-  has_class_weight_ =
-    (this->layer_param_.softmax_param().class_weight().size() > 0);
+  has_class_weight_ = !this->layer_param_.softmax_param().class_weight().empty();
   softmax_axis_ =
     bottom[0]->CanonicalAxisIndex(this->layer_param_.softmax_param().axis());
   if (has_class_weight_) {
@@ -71,6 +70,7 @@ void SoftmaxWithLossLayer<Dtype>::Reshape(
   outer_num_ = bottom[0]->count(0, softmax_axis_);
   inner_num_ = bottom[0]->count(softmax_axis_ + 1);
   counts_.Reshape({ outer_num_, inner_num_ });
+  loss_.Reshape({ outer_num_, inner_num_ });
   CHECK_EQ(outer_num_ * inner_num_, bottom[1]->count())
       << "Number of labels must match number of predictions; "
       << "e.g., if softmax axis == 1 and prediction shape is (N, C, H, W), "

@@ -5,6 +5,9 @@
 #include "caffe/layers/softmax_loss_layer.hpp"
 #include "caffe/util/math_functions.hpp"
 
+#include "thrust/functional.h"
+#include "thrust/sort.h"
+
 namespace caffe {
 
   template <typename Dtype>
@@ -64,7 +67,7 @@ namespace caffe {
     // Since this memory is not used for anything until it is overwritten
     // on the backward pass, we use it here to avoid having to allocate new GPU
     // memory to accumulate intermediate results in the kernel.
-    Dtype* loss_data = bottom[0]->mutable_gpu_diff();
+    Dtype* loss_data = loss_.mutable_gpu_data();
     // Similarly, this memory is never used elsewhere, and thus we can use it
     // to avoid having to allocate additional GPU memory.
     Dtype* counts = counts_.mutable_gpu_data();
@@ -168,11 +171,12 @@ namespace caffe {
     }
     if (propagate_down[0]) {
       if (has_hard_ratio_ && bottom.size() == 3) {
-        std::sort(bottom[0]->mutable_cpu_diff(), bottom[0]->mutable_cpu_diff() + outer_num_ * inner_num_);
-        Dtype loss_threshold = bottom[0]->cpu_diff()[(int)(outer_num_ * inner_num_ * (1 - hard_ratio_))];
+        caffe_copy(outer_num_ * inner_num_, loss_.cpu_data(), loss_.mutable_cpu_diff());
+        std::sort(loss_.mutable_cpu_diff(), loss_.mutable_cpu_diff() + outer_num_ * inner_num_);//thrust::sort
+        Dtype loss_threshold = loss_.cpu_diff()[(int)(outer_num_ * inner_num_ * (1 - hard_ratio_))];
         // NOLINT_NEXT_LINE(whitespace/operators)
         Threshold<Dtype> << <CAFFE_GET_BLOCKS(outer_num_ * inner_num_), CAFFE_CUDA_NUM_THREADS >> >(
-          outer_num_ * inner_num_, bottom[0]->gpu_diff(), loss_threshold, bottom[2]->mutable_gpu_data());
+          outer_num_ * inner_num_, loss_.gpu_data(), loss_threshold, bottom[2]->mutable_gpu_data());
       }
 
       Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();

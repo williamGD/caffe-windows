@@ -33,10 +33,10 @@ void PredictBoxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   }
   
   if (nms_) {
-    CHECK_EQ(bottom[1]->num(), bottom[2]->num());
-    CHECK_EQ(bottom[1]->channels(), bottom[2]->channels());
-    CHECK_EQ(bottom[1]->height(), bottom[2]->height());
-    CHECK_EQ(bottom[1]->width(), bottom[2]->width());
+    CHECK_EQ(bottom[0]->num(), bottom[2]->num());
+    CHECK_EQ(bottom[0]->channels(), bottom[2]->channels());
+    CHECK_EQ(bottom[0]->height(), bottom[2]->height());
+    CHECK_EQ(bottom[0]->width(), bottom[2]->width());
   }
 
   top[0]->Reshape({ bottom[0]->num(), 5, bottom[0]->height(), bottom[0]->width() });

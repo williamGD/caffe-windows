@@ -127,6 +127,7 @@ class SoftmaxWithLossLayer : public LossLayer<Dtype> {
   bool has_class_weight_;
   Blob<Dtype> class_weight_;
   Blob<Dtype> counts_;
+  Blob<Dtype> loss_;
   /// How to normalize the output loss.
   LossParameter_NormalizationMode normalization_;
 
