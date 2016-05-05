@@ -203,7 +203,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
       for (int i = 0; i < outer_num_; ++i) {
         for (int j = 0; j < inner_num_; ++j) {
           const int label_value = static_cast<int>(label[i * inner_num_ + j]);
-          const Dtype weight_value = weights[i * inner_num_ + j] * (has_class_weight_ ? class_weight_.cpu_data()[label_value] : 1.0);
+          const Dtype weight_value = weights[i * inner_num_ + j];
           if (has_ignore_label_ && label_value == ignore_label_) {
             for (int c = 0; c < bottom[0]->shape(softmax_axis_); ++c) {
               bottom_diff[i * dim + c * inner_num_ + j] = 0;
@@ -212,7 +212,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
           else {
             bottom_diff[i * dim + label_value * inner_num_ + j] -= 1;
             for (int c = 0; c < bottom[0]->shape(softmax_axis_); ++c) {
-              bottom_diff[i * dim + c * inner_num_ + j] *= weight_value;
+              bottom_diff[i * dim + c * inner_num_ + j] *= weight_value * (has_class_weight_ ? class_weight_.cpu_data()[label_value] : 1.0);
             }
             if(weight_value != 0) count += weight_value;
           }

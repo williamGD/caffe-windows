@@ -138,7 +138,7 @@ namespace caffe {
       const int n = index / spatial_dim;
       const int s = index % spatial_dim;
       const int label_value = static_cast<int>(label[n * spatial_dim + s]);
-      const Dtype weight_value = weights[n * spatial_dim + s] * class_weight[label_value];
+      const Dtype weight_value = weights[n * spatial_dim + s];
       if ((has_ignore_label_ && label_value == ignore_label_) || (weight_value == 0)) {
         for (int c = 0; c < channels; ++c) {
           bottom_diff[n * dim + c * spatial_dim + s] = 0;
@@ -148,7 +148,7 @@ namespace caffe {
       else {
         bottom_diff[n * dim + label_value * spatial_dim + s] -= 1;
         for (int c = 0; c < channels; ++c) {
-          bottom_diff[n * dim + c * spatial_dim + s] *= weight_value;
+          bottom_diff[n * dim + c * spatial_dim + s] *= weight_value * class_weight[c];
         }
         counts[index] = weight_value;
       }
