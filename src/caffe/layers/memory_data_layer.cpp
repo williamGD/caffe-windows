@@ -61,8 +61,7 @@ void MemoryDataLayer<Dtype>::AddMatVector(const vector<cv::Mat>& mat_vector,
   CHECK(!has_new_data_) <<
       "Can't add mat until current data has been consumed.";
   CHECK_GT(num, 0) << "There is no mat to add";
-  CHECK_EQ(num % batch_size_, 0) <<
-      "The added data must be a multiple of the batch size.";
+  batch_size_ = num;
   height_ = mat_vector[0].rows;
   width_ = mat_vector[0].cols;
   added_data_.Reshape(num, channels_, height_, width_);
@@ -85,7 +84,6 @@ template <typename Dtype>
 void MemoryDataLayer<Dtype>::Reset(Dtype* data, Dtype* labels, int n) {
   CHECK(data);
   CHECK(labels);
-  CHECK_EQ(n % batch_size_, 0) << "n must be a multiple of batch size";
   // Warn with transformation parameters since a memory array is meant to
   // be generic and no transformations are done with Reset().
   if (this->layer_param_.has_transform_param()) {
